@@ -15,64 +15,69 @@ USE [Northwind-pr]
    where CodigoDoCliente ='VINET');--filtro*/
 
 
-/*2. Modifique a consulta do exercício 1 e apure o total de cada pedido apresentado. Observe que o total deve ser
-apurado, pois não existe uma coluna definida.*/ 
+/*2. Modifique a consulta do exercÃ­cio 1 e apure o total de cada pedido apresentado. Observe que o total deve ser
+apurado, pois nÃ£o existe uma coluna definida.*/ 
  Select NumeroDoPedido,
  SUM(Quantidade*PrecoUnitario)as Valor_Total 
  from DetalhesDoPedido
  group by NumeroDoPedido 
  Having NumeroDoPedido in 
  (Select NumeroDoPedido from Pedidos where CodigoDoCliente='VINET');
-/*3. Selecione o código do cliente, número do pedido da tabela “pedidos” somente dos clientes cujo código iniciem
-com ‘TR’ e apure, por subquery, a média do preço unitário de todos os pedidos da tabela “detalhesDoPedido”,
-exibindo como “Media Preço Unitário”.*/  
+/*3. Selecione o cÃ³digo do cliente, nÃºmero do pedido da tabela â€œpedidosâ€ somente dos clientes cujo cÃ³digo iniciem
+com â€˜TRâ€™ e apure, por subquery, a mÃ©dia do preÃ§o unitÃ¡rio de todos os pedidos da tabela â€œdetalhesDoPedidoâ€,
+exibindo como â€œMedia PreÃ§o UnitÃ¡rioâ€.*/  
+
 select cli.CodigoDoCliente,ped.NumeroDoPedido,
 (select  AVG(PrecoUnitario)from DetalhesDoPedido det)
 as  Medida from Clientes cli 
 inner join pedidos ped  on ped.CodigoDoCliente=cli.CodigoDoCliente
 where cli.CodigoDoCliente like 'TR%'
-/*4. Usando a cláusula Exists, liste o código do cliente, o nome da empresa e o país de todos os clientes que não
+
+/*4. Usando a clÃ¡usula Exists, liste o cÃ³digo do cliente, o nome da empresa e o paÃ­s de todos os clientes que nÃ£o
 tenham nenhum pedido registrado;*/
- SELECT CodigoDoCliente,NomeDaEmpresa,Pais FROM Clientes.cli
- WHERE NOT EXISTS	(SELECT*FROM  Pedidos.ped WHERE ped.CodigoDoCliente=cli.CodigoDoCliente)
+
+ SELECT CodigoDoCliente,NomeDaEmpresa,Pais FROM Clientes cli
+ WHERE NOT EXISTS	(SELECT*FROM  Pedidos ped WHERE ped.CodigoDoCliente=cli.CodigoDoCliente)
  
- /*5.Recuperar o código do produto, o nome e o preço unitário de todos os produtos cujo preço unitário seja maior
-que o preço de qualquer outro produto vendido e que tenha desconto de 25% ou mais. Observe que os dados das
-vendas estão na tabela “DetalhesDoPedido”. Usar o predicado ANY.*/
- SELECT CodigoDoCliente,NomeDoProduto,PrecoUnitario FROM Produtos
- WHERE PrecoUnitario >= ANY(SELECT PrecoUnitario FROM DetalhesDoPedido Where Desconto>= 0.25)
+ /*5.Recuperar o cÃ³digo do produto, o nome e o preÃ§o unitÃ¡rio de todos os produtos cujo preÃ§o unitÃ¡rio seja maior
+que o preÃ§o de qualquer outro produto vendido e que tenha desconto de 25% ou mais. Observe que os dados das
+vendas estÃ£o na tabela â€œDetalhesDoPedidoâ€. Usar o predicado ANY.*/
+
+ SELECT CodigoDoProduto,NomeDoProduto,PrecoUnitario FROM Produtos
+ WHERE PrecoUnitario >ANY(SELECT PrecoUnitario FROM DetalhesDoPedido Where Desconto>= 0.25)
  
-/*6.Modifique a consulta do exercício anterior alterando o predicado para ALL.*/
+/*6.Modifique a consulta do exercÃ­cio anterior alterando o predicado para ALL.*/
 
  SELECT CodigoDoProduto,NomeDoProduto,PrecoUnitario FROM Produtos
  WHERE PrecoUnitario >= ALL( SELECT PrecoUnitario FROM DetalhesDoPedido WHERE Desconto>=0.25)
  
- /*7.Usando o predicado IN, liste o código do produto e o nome de todos os produtos que foram vendidos com
+ /*7.Usando o predicado IN, liste o cÃ³digo do produto e o nome de todos os produtos que foram vendidos com
 desconto igual a 10%.*/
+
 SELECT CodigoDoProduto,NomeDoProduto FROM Produtos
- WHERE CodigoDoProduto IN (SELECT CodigoDoProduto FROM DetalhesDoPedido” WHENEVER Desconto - 0.10)
+ WHERE CodigoDoProduto IN (SELECT CodigoDoProduto FROM DetalhesDoPedido WHERE Desconto = 0.10)
  
 /*8. Crie uma consulta usando UNION, com as tabelas de clientes e fornecedores cujo resultado seja igual ao
 apresentado abaixo.*/
 SELECT NomeDaEmpresa,NomeDoContato FROM Fornecedores
 UNION ALL
-SELECT NomeDaEmpresa,NomeDoContato,FROM Clientes
+SELECT NomeDaEmpresa,NomeDoContato FROM Clientes
 
  /*9.Modifique a consulta obtida acima para que o resultado seja igual ao apresentado abaixo.
-Total de 122 linhas – mostrando 9*/
+Total de 122 linhas â€“ mostrando 9*/
 
 SELECT CONVERT(VARCHAR(20),CodigoDoFornecedor) AS Codigo,NomeDaEmpresa,NomeDoContato,'F' AS Tipo FROM Fornecedores
 UNION ALL 
-SELECT CodigoDoCliente,NomeDaEmpresa,NomeDoContato'C' AS Tipo FROM Clientes
+SELECT CodigoDoCliente,NomeDaEmpresa,NomeDoContato, 'C' AS Tipo FROM Clientes
 
 
 /*10. Construa uma consulta com Inner Join cujo resultado seja semelhante ao apresentado abaixo.
-Total de 830 linhas – mostrando 10.*/
- SELECT Cli.CodigoDoCliente,Cli.CodigoDoFornecedor,Ped.NumeroDoPedido,Ped.DataDoPedido,Func.Nome
- SUM (Det.Quantidade*Det.PrecoUnitario)AS ValorTotal
- From Pedidos.Ped
- INNER Join DetalhesDoPedido Det ON Det.NumeroDoPedido = Ped.NumeroDoPedido
- INNER Join Funcionarios Fun ON Fun.CodigoDoFuncionario = Ped.CodigoDoFuncionario
- INNER Join Clientes Cli ON Cli CodigoDoCliente = Ped.CodigoDoCliente
- GROUP BY Ped.NumeroDoPedido,Cli.CodigoDoCliente,Cli.NomeDaEmpresa,Ped.DataDoPedido,Func.Nome 
- GROUP BY CodigoDoCliente ASC
+Total de 830 linhas â€“ mostrando 10.*/
+ SELECT Cli.CodigoDoCliente,Cli.NomeDaEmpresa,Ped.NumeroDoPedido,Ped.DataDoPedido,Func.Nome,
+ SUM(Det.Quantidade* Det.PrecoUnitario)AS ValorTotal
+ FROM Pedidos Ped
+ INNER JOIN DetalhesDoPedido Det ON Det.NumeroDoPedido=Ped.NumeroDoPedido
+ INNER JOIN Funcionarios Func ON Func.CodigoDoFuncionario=Ped.CodigoDoFuncionario
+  INNER JOIN Clientes Cli ON Cli.CodigoDoCliente=Ped.CodigoDoCliente
+  GROUP BY Ped.NumeroDoPedido, Cli.CodigoDoCliente,Cli.NomeDaEmpresa,Ped.NumeroDoPedido,Ped.DataDoPedido,Func.Nome
+  ORDER BY CodigoDoCliente ASC
