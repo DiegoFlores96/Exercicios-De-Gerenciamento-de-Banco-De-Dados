@@ -1,0 +1,40 @@
+Exercícios
+Utilizando a base Northwind:
+/*1. Crie uma função Fn_Maiuscula, que deverá
+receber um parâmetro do tipo Varchar(1000). A
+função deverá retornar o texto recebido
+totalmente em letras maiúsculas.*/
+USE [Northwind-pr]
+ CREATE FUNCTION FN_Maiusculas(@texto VARCHAR(1000))
+	RETURNS VARCHAR(1000)
+		AS
+			BEGIN
+				RETURN upper (@texto)
+			END
+	 SELECT dbo.FN_Maiusculas('	o texto convertido é  ..')AS FRASE_MAISCULA
+
+	 /*2. Construa uma função que retorne a soma de 2 números inteiros, recebidos como parâmetros.*/
+		
+		USE[Northwind-pr]
+	 create function FN_SomaValor1(@valor1 int,@valor2 int)
+	 returns int
+	 as 
+	 begin
+	   
+	  return @valor1*@valor2
+	 end 
+	  select dbo.FN_SomaValor1(2,4)As resultado
+	 
+/*3. Construa uma função que apure e retorne o total
+do pedido, em R$, cujo código será informado como
+parâmetro.*/
+ 
+	Create Function dbo.Fn_Calculo(@NumeroDoPedido int)
+		returns table 
+		as
+
+		return (select NumeroDoPedido,sum(PrecoUnitario*Quantidade) AS SomaDosValores from DetalhesDoPedido
+		where NumeroDoPedido = @NumeroDoPedido
+		Group By NumeroDoPedido )
+		
+		Select * from  dbo.Fn_Calculo(10248) 
